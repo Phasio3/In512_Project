@@ -16,7 +16,7 @@ from time import sleep
 class Game:
     """ Handle the whole game """
     def __init__(self, nb_agents, map_id):
-        self.walls_number = 5
+        self.walls_number = 4
         self.nb_agents = nb_agents
         self.nb_ready = 0
         self.agent_id = 0
@@ -24,8 +24,7 @@ class Game:
         self.agent_paths = [None]*nb_agents
         self.load_map(map_id)
         self.gui = GUI(self)
-        
-
+    
     
     def load_map(self, map_id):
         """ Load a map """

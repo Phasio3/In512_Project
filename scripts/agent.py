@@ -15,7 +15,10 @@ from time import sleep
 class Agent:
     """ Class that implements the behaviour of each agent based on their perception and communication with other agents """
     def __init__(self, server_ip):
-        #TODO: DEFINE YOUR ATTRIBUTES HERE
+        # state variables
+        self.new_cell_val_ready = False
+        self.swimlane_direction = "down"  # "down" or "up"
+        self.swilane_decision = "right"   # "left" or "right"
 
         #DO NOT TOUCH THE FOLLOWING INSTRUCTIONS
         self.network = Network(server_ip=server_ip)
