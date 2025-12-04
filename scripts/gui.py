@@ -42,7 +42,6 @@ class GUI:
             return True
         coord_taken = self.game.map_real[y, x] != 0.0 or robot_pos_encounter
         return coord_taken
-
     
     def available_directions(self,x,y):
         available_directions = dict()
@@ -95,9 +94,16 @@ class GUI:
         rand_index = np.random.randint(len(possible_choices))
         chosen_direction = possible_choices[rand_index]
         
+        self.set_wall_frontiers(rand_x,rand_y)
         return rand_x,rand_y,chosen_direction
-        
     
+    def set_wall_frontiers(self,x,y):
+        # Create a frontier around the wall
+        for frontier_x in range(x-1, x+2):
+            for frontier_y in range(y-1, y+2):
+                if 0 <= frontier_x < self.w and 0 <= frontier_y < self.h and self.game.map_real[frontier_y,frontier_x] != WALL_PERCENTAGE:
+                    if not self.is_coord_taken(frontier_x,frontier_y):
+                        self.game.add_val(frontier_x, frontier_y, FRONTIER_PERCENTAGE)
     
     def create_walls(self, wall_img):
         self.walls = [wall_img.copy() for _ in range(self.game.walls_number)]
@@ -115,23 +121,31 @@ class GUI:
                 if d == "RIGHT":
                     self.game.add_val(rand_x+1,rand_y,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x+1,rand_y))
+                    self.set_wall_frontiers(rand_x+1,rand_y)
                     self.game.add_val(rand_x+2,rand_y,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x+2,rand_y))
+                    self.set_wall_frontiers(rand_x+2,rand_y)
                 elif d == "LEFT":
                     self.game.add_val(rand_x-1,rand_y,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x-1,rand_y))
+                    self.set_wall_frontiers(rand_x-1,rand_y)
                     self.game.add_val(rand_x-2,rand_y,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x-2,rand_y))
+                    self.set_wall_frontiers(rand_x-2,rand_y)
                 elif d == "UP":
                     self.game.add_val(rand_x,rand_y-1,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x,rand_y-1))
+                    self.set_wall_frontiers(rand_x,rand_y-1)
                     self.game.add_val(rand_x,rand_y-2,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x,rand_y-2))
+                    self.set_wall_frontiers(rand_x,rand_y-2)
                 elif d == "DOWN":
                     self.game.add_val(rand_x,rand_y+1,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x,rand_y+1))
+                    self.set_wall_frontiers(rand_x,rand_y+1)
                     self.game.add_val(rand_x,rand_y+2,WALL_PERCENTAGE)
                     self.walls_pos.append((rand_x,rand_y+2))
+                    self.set_wall_frontiers(rand_x,rand_y+2)
             
             #print(f"\n------------------\nwall number : {wall+1}/{self.game.walls_number*5}\nrandom wall_position : {self.walls_pos}\n------------------\n")
 
@@ -188,6 +202,16 @@ class GUI:
         for j in range(1, self.w):
             pygame.draw.line(self.screen, BLACK, (j*self.cell_size, 0), (j*self.cell_size, self.h*self.cell_size))
 
+        for i in range(self.w):
+            for j in range(self.h):
+                #map_real values
+                if self.game.map_real[j, i] == WALL_PERCENTAGE:
+                    pygame.draw.rect(self.screen, BLACK, (i*self.cell_size, j*self.cell_size, self.cell_size, self.cell_size))
+                elif self.game.map_real[j, i] == FRONTIER_PERCENTAGE:
+                    pygame.draw.rect(self.screen, (200, 200, 200), (i*self.cell_size, j*self.cell_size, self.cell_size, self.cell_size))
+                elif self.game.map_real[j, i] > 0:
+                    pygame.draw.rect(self.screen, (0, 255*self.game.map_real[j, i], 0), (i*self.cell_size, j*self.cell_size, self.cell_size, self.cell_size))
+        
         for i in range(self.game.nb_agents):
             #agent_paths
             for x, y in self.game.agent_paths[i]:
@@ -210,3 +234,4 @@ class GUI:
             #walls
             self.screen.blit(self.walls[i], self.walls[i].get_rect(center=(self.walls_pos[i][0]*self.cell_size + self.cell_size//2, self.walls_pos[i][1]*self.cell_size + self.cell_size//2)))
         pygame.display.update()
+        
